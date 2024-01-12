@@ -17,5 +17,5 @@ if folder_select_button:
     path = os.path.dirname(selected_folder_path)
 
     st.write("Folder:", path)
-
+    st.write(st.session_state['gvn'])
 # https://medium.com/@kjavaman12/how-to-create-a-folder-selector-in-streamlit-e44816c06afd

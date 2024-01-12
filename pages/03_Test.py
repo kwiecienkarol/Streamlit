@@ -51,3 +51,5 @@ if st.button('Say hello'):
 #     st.write('yo')
 # else:
 #     st.write('Goodbye')
+
+st.multiselect('curency',['USD','EUR'])
