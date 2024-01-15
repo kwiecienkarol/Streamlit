@@ -1,21 +1,46 @@
 import streamlit as st
-import tkinter as tk
-from tkinter import filedialog
-import os
+import pandas as pd
+import io
 
-def select_file():
-   root = tk.Tk()
-   root.withdraw()
-   folder_path =root.filename= tk.filedialog.askopenfilename(master=root, filetypes=[("Excel files", "*.xlsx")])
-   root.destroy()
-   return folder_path
+# buffer to use for excel writer
+buffer = io.BytesIO()
 
+data = {
+    "calories": [420, 380, 390],
+    "duration": [50, 40, 45],
+    "random1": [5, 12, 1],
+    "random2": [230, 23, 1]
+}
+df = pd.DataFrame(data)
 
-folder_select_button = st.button("Select Pricelist")
-if folder_select_button:
-    selected_folder_path = select_file()
-    path = os.path.dirname(selected_folder_path)
+@st.cache
+def convert_to_csv(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv(index=False).encode('utf-8')
 
-    st.write("Folder:", path)
-    st.write(st.session_state['gvn'])
-# https://medium.com/@kjavaman12/how-to-create-a-folder-selector-in-streamlit-e44816c06afd
+csv = convert_to_csv(df)
+
+# display the dataframe on streamlit app
+st.write(df)
+
+# download button 1 to download dataframe as csv
+download1 = st.download_button(
+    label="Download data as CSV",
+    data=csv,
+    file_name='large_CSV_df.csv',
+    mime='text/csv'
+)
+
+# download button 2 to download dataframe as xlsx
+with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+    # Write each dataframe to a different worksheet.
+    df.to_excel(writer, sheet_name='Sheet1', index=False)
+
+    download2 = st.download_button(
+        label="Download data as Excel",
+        data=buffer,
+        file_name='large_df.xlsx',
+        mime='application/vnd.ms-excel'
+    )
+
+st.download_button('streamlit_buton',data=csv,file_name='down1')
