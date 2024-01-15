@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.title('HUAWEI')
+st.title('WATCHGUARD')
 
 st.markdown('------------------------------------------------------------------')
 st.markdown('### UPD creator ###')
