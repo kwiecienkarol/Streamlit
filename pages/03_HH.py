@@ -71,18 +71,24 @@ if btn1:
 
             st.write(TAR)
 
+            #a dding Iasset
+            iasset_data = {'iAsset': [], 'No': []}
+            iasset = pd.DataFrame(iasset_data)
+
             # buffer to use for excel writer
             buffer = io.BytesIO()
 
             # download button 2 to download dataframe as xlsx
             with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
                 # Write each dataframe to a different worksheet.
-                TAR.to_excel(writer, sheet_name='TAR', index=False)
+                iasset.to_excel(writer, sheet_name='TAR', startrow=0, startcol=0, index=False)
+                TAR.to_excel(writer, sheet_name='TAR',startrow=1, index=False)
+                writer.close()
 
                 downloadTAR = st.download_button(
                     label="Download TAR",
                     data=buffer,
-                    file_name='HUAWEI-TAR.xlsx',
+                    file_name='HUAWEI-TAR-'+today+'-SKU.xlsx',
                     mime='application/vnd.ms-excel'
                 )
 
