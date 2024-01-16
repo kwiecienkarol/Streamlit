@@ -1,21 +1,30 @@
 import streamlit as st
-import tkinter as tk
-from tkinter import filedialog
-import os
+import xlsxwriter
+from io import BytesIO
+import pandas as pd
 
-def select_file():
-   root = tk.Tk()
-   root.withdraw()
-   folder_path =root.filename= tk.filedialog.askopenfilename(master=root, filetypes=[("Excel files", "*.xlsx")])
-   root.destroy()
-   return folder_path
+output = BytesIO()
+
+data = {
+    "calories": [420, 380, 390],
+    "duration": [50, 40, 45],
+    "random1": [5, 12, 1],
+    "random2": [230, 23, 1]
+}
+df = pd.DataFrame(data)
 
 
-folder_select_button = st.button("Select Pricelist")
-if folder_select_button:
-    selected_folder_path = select_file()
-    path = os.path.dirname(selected_folder_path)
+# Write files to in-memory strings using BytesIO
+# See: https://xlsxwriter.readthedocs.io/workbook.html?highlight=BytesIO#constructor
+workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+worksheet = workbook.add_worksheet()
 
-    st.write("Folder:", path)
-    st.write(st.session_state['gvn'])
-# https://medium.com/@kjavaman12/how-to-create-a-folder-selector-in-streamlit-e44816c06afd
+worksheet.write('A1', 'Hello')
+workbook.close()
+
+st.download_button(
+    label="Download Excel workbook",
+    data=output.getvalue(),
+    file_name="workbook.xlsx",
+    mime="application/vnd.ms-excel"
+)
