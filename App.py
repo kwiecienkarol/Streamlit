@@ -10,7 +10,9 @@ st.header('Pricelist Information Tool for Automation')
 
 # st.header(':dancer:  PATI -  Pricelist Automat for Transforming Informations')
 st.header('')
+
 st.write('Program transform Pricelist files to UPD and TAR format. Once the price list data has been imported, it can be processed in a variety of ways')
+
 st.markdown('-----------')
 
 st.markdown('<a href="mailto:kwiecienkarol@o2.pl">Contact me </a>', unsafe_allow_html=True)
@@ -100,6 +102,7 @@ data = [('HARD', 'SECURITY', 'INITIAL', '84714900', 'HW', 'GROSS', 'HWR'),
 gn = pd.DataFrame.from_records(data, columns=['Activity 1', 'Activity 2', 'Activity 3', 'Intrastat Code','Gross/Net Classification', 'Gross/Net', 'SUBBRAND'])
 gn['merge'] = gn['Activity 1'] + gn['Activity 2'] + gn['Activity 3']
 
+
 # def person ():
 #     person_data=[('Karol Kwiecień', "A86227"),('Katarzyna Czyż','A86361'),('Emil Twardowski','A93176'),('Paweł Czaja','A89264')]
 #     pd.DataFrame.from_records(person_data, columns=['Name', 'ID'])
@@ -109,5 +112,6 @@ person_list={"Karol Kwiecień":'A86227','Katarzyna Czyż':"A86"}
 
 # st.session_state['gvn']=gn
 # st.session_state['person']=person
+
 # st.write(st.session_state['gvn'])
 

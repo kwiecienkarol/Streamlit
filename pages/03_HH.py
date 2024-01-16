@@ -6,6 +6,7 @@ import os
 # from tkinter import filedialog
 # import tkinter as tk
 import numpy as np
+from openpyxl import load_workbook
 import io
 
 today=datetime.datetime.today().strftime("%d.%m.%Y")
@@ -70,24 +71,18 @@ if btn1:
 
             st.write(TAR)
 
-            # adding iAsset
-            iasset_data = {'iAsset': [], 'No': []}
-            iasset = pd.DataFrame(iasset_data)
-
             # buffer to use for excel writer
             buffer = io.BytesIO()
 
             # download button 2 to download dataframe as xlsx
             with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
                 # Write each dataframe to a different worksheet.
-                iasset.to_excel(writer, sheet_name='TAR', startrow=0, startcol=0, index=False)
-                TAR.to_excel(writer, sheet_name='TAR',startrow=1, index=False)
-                writer.close()
+                TAR.to_excel(writer, sheet_name='TAR', index=False)
 
                 downloadTAR = st.download_button(
                     label="Download TAR",
                     data=buffer,
-                    file_name='HUAWEI-TAR'+today+'.xlsx',
+                    file_name='HUAWEI-TAR.xlsx',
                     mime='application/vnd.ms-excel'
                 )
 
