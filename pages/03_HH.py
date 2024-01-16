@@ -7,7 +7,9 @@ import os
 # import tkinter as tk
 import numpy as np
 from openpyxl import load_workbook
+
 import io
+
 
 today=datetime.datetime.today().strftime("%d.%m.%Y")
 
@@ -16,11 +18,14 @@ st.markdown('[Huawei Sharpoint](https://arrowelectronics.sharepoint.com/:f:/r/si
 
 st.markdown('------------------------------------------------------------------')
 
+
 id=st.selectbox(':small_blue_diamond: Your name - ID',('Karol Kwiecień - A86227','Katarzyna Czyż - A86361', 'Emil Twardowski - A93176', 'Chistian Gay - A60276','Paweł Czaja - A89264', 'Hanna Źródlewska - 132693', 'Karmen Bautembach - 136182'),index=None,placeholder="Select your name")
+
 
 st.markdown('------------------------------------------------------------------')
 
 pricelist=st.file_uploader(label=':small_blue_diamond: Select Pricelist file', accept_multiple_files=False, type=["xlsx"])
+
 
 st.markdown('------------------------------------------------------------------')
 
@@ -109,5 +114,16 @@ if btn2:
             st.success('ID and pricelist OK')
         else:
             st.error('Select your name')
+
+
+st.markdown('------------------------------------------------------------------')
+# ------------------------------------  TAR  -----------------------------------
+st.markdown('### :small_blue_diamond:  TAR file ###')
+
+btn1 = st.button(' Create TAR', type='primary')
+if btn1:
+    if pricelist is not None:
+        st.success('Pricelist selected')
+
     else:
         st.error('no pricelist selected')
