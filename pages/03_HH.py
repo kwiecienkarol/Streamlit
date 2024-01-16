@@ -7,6 +7,7 @@ import os
 # import tkinter as tk
 import numpy as np
 from openpyxl import load_workbook
+import io
 
 today=datetime.datetime.today().strftime("%d.%m.%Y")
 
@@ -28,7 +29,7 @@ st.markdown('### :small_blue_diamond:  TAR file ###')
 
 col1, col2 = st.columns(2)
 with col2:
-    st.selectbox('Select currency',('EUR','USD','GBP'))
+    currency=st.selectbox('Select currency',('EUR','USD','GBP'))
 with col1:
     data = st.date_input("Pricelist start date", value=datetime.date.today())
     t = str(data.strftime("%d.%m.%Y"))
@@ -46,6 +47,7 @@ if btn1:
             TAR.insert(loc=1, column='AccountCode', value="ALL")
             TAR.insert(loc=2, column='Currency', value="EUR")
             TAR.insert(loc=3, column='Quantity', value="1")
+            TAR['Currency']=currency
             TAR['Valid From'] = t
             TAR['Valid To'] = ""
             TAR['SearchAgain'] = "YES"
@@ -68,6 +70,23 @@ if btn1:
             TAR['Channel Price'] = TAR['Channel Price'].astype('float64')
 
             st.write(TAR)
+
+            # buffer to use for excel writer
+            buffer = io.BytesIO()
+
+            # download button 2 to download dataframe as xlsx
+            with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+                # Write each dataframe to a different worksheet.
+                TAR.to_excel(writer, sheet_name='TAR', index=False)
+
+                downloadTAR = st.download_button(
+                    label="Download TAR",
+                    data=buffer,
+                    file_name='HUAWEI-TAR.xlsx',
+                    mime='application/vnd.ms-excel'
+                )
+
+
         else:
             st.error('Select your name')
 
@@ -87,7 +106,7 @@ btn2 = st.button(' Create UPD', type='primary')
 if btn2:
     if pricelist is not None:
         if id is not None:
-            st.write('ID and pricelist OK')
+            st.success('ID and pricelist OK')
         else:
             st.error('Select your name')
     else:

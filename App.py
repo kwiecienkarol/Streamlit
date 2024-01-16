@@ -13,8 +13,6 @@ st.header('')
 st.write('Program transform Pricelist files to UPD and TAR format. Once the price list data has been imported, it can be processed in a variety of ways')
 st.markdown('-----------')
 
-
-st.markdown('-----------')
 st.markdown('<a href="mailto:kwiecienkarol@o2.pl">Contact me </a>', unsafe_allow_html=True)
 
 # with st.expander('wprowadx dane do UPD'):
@@ -109,13 +107,7 @@ gn['merge'] = gn['Activity 1'] + gn['Activity 2'] + gn['Activity 3']
 
 person_list={"Karol Kwiecień":'A86227','Katarzyna Czyż':"A86"}
 
-
-
 # st.session_state['gvn']=gn
 # st.session_state['person']=person
 # st.write(st.session_state['gvn'])
-# var1
-# var2
-# var3[0]
 
-# btn=st.button('Run', type='primary')
