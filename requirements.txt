@@ -2,7 +2,7 @@ pandas
 plotly
 streamlit
 yfinance
-tkinter
 numpy
 xlsxwriter
 io
+datetime
