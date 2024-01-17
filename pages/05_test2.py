@@ -28,3 +28,15 @@ st.download_button(
     file_name="workbook.xlsx",
     mime="application/vnd.ms-excel"
 )
+con_sub = pd.DataFrame()
+subgroups=st.file_uploader(label='Select Extract Vendor file', accept_multiple_files=True, type=["xlsx"])
+for uploaded_file in subgroups:
+    sub_data = pd.read_excel(uploaded_file)
+    con_sub=pd.concat([sub_data,con_sub])
+    st.write(con_sub)
+
+if con_sub.empty:
+    st.write('empty')
+else:
+    st.success('file loaded')
+    # st.write(subgroups)

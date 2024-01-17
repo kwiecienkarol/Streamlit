@@ -22,7 +22,13 @@ st.markdown('------------------------------------------------------------------'
 
 pricelist=st.file_uploader(label=':small_blue_diamond: Select Pricelist file', accept_multiple_files=False, type=["xlsx"])
 
+
 st.markdown('------------------------------------------------------------------')
+
+# adding Iasset table
+iasset_data = {'iAsset': [], 'No': []}
+iasset = pd.DataFrame(iasset_data)
+
 
 # ------------------------------------  TAR  -----------------------------------
 st.markdown('### :small_blue_diamond:  TAR file ###')
@@ -71,10 +77,6 @@ if btn1:
 
             st.write(TAR)
 
-            #a dding Iasset
-            iasset_data = {'iAsset': [], 'No': []}
-            iasset = pd.DataFrame(iasset_data)
-
             # buffer to use for excel writer
             buffer = io.BytesIO()
 
@@ -108,12 +110,31 @@ st.markdown('### :small_blue_diamond:  UPD file ###')
 
 ekstrakt=st.file_uploader(label='Select Extract Vendor file', accept_multiple_files=False, type=["csv"])
 
+con_sub = pd.DataFrame()
+subgroups=st.file_uploader(label='Select Extract Vendor file', accept_multiple_files=True, type=["xlsx"])
+for uploaded_file in subgroups:
+    sub_data = pd.read_excel(uploaded_file)
+    con_sub=pd.concat([sub_data,con_sub])
+    # st.write(con_sub)
+
+
 btn2 = st.button(' Create UPD', type='primary')
 if btn2:
     if pricelist is not None:
         if id is not None:
-            st.success('ID and pricelist OK')
+            if ekstrakt is not None:
+                if con_sub.empty:
+                    st.error('Select files with subgroups')
+                else:
+                    st.success('ID and pricelist, extrakt and SUB OK')
+                    pricelist_table = pd.read_excel(pricelist)
+
+
+                    st.write(con_sub)
+
+            else:
+                st.error('Add HUAWEI Extract file')
         else:
-            st.error('Select your name')
+            st.error('Select your name ID')
     else:
         st.error('no pricelist selected')

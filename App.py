@@ -4,15 +4,16 @@ import pandas as pd
 
 # st.set_page_config(page_title="App", layout="wide")
 
-st.header(':taco: P.I.T.A')
+# st.header(':taco: P.I.T.A')
 st.header('Pricelist Information Tool for Automation')
 # st.header(" :information_desk_person: PUPA - Pricelist Update Program Automat")
 
 # st.header(':dancer:  PATI -  Pricelist Automat for Transforming Informations')
 st.header('')
 
-st.write('Program transform Pricelist files to UPD and TAR format. Once the price list data has been imported, it can be processed in a variety of ways')
-
+st.write('')
+st.write('Program transform Pricelist files to UPD and TAR format.')
+st.write('Once the price list data has been imported, it can be processed in a variety of ways')
 st.markdown('-----------')
 
 st.markdown('<a href="mailto:kwiecienkarol@o2.pl">Contact me </a>', unsafe_allow_html=True)
@@ -109,6 +110,7 @@ gn['merge'] = gn['Activity 1'] + gn['Activity 2'] + gn['Activity 3']
     # st.write(person_ID)
 
 person_list={"Karol Kwiecień":'A86227','Katarzyna Czyż':"A86"}
+
 
 # st.session_state['gvn']=gn
 # st.session_state['person']=person
