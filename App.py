@@ -112,7 +112,7 @@ gn['merge'] = gn['Activity 1'] + gn['Activity 2'] + gn['Activity 3']
 person_list={"Karol Kwiecień":'A86227','Katarzyna Czyż':"A86"}
 
 
-# st.session_state['gvn']=gn
+st.session_state['gvn']=gn
 # st.session_state['person']=person
 
 # st.write(st.session_state['gvn'])
