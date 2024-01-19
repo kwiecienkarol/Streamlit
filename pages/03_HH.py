@@ -107,10 +107,10 @@ st.markdown('------------------------------------------------------------------'
 # ------------------------------------  UPD  -----------------------------------
 st.markdown('### :small_blue_diamond:  UPD file ###')
 
-ekstrakt=st.file_uploader(label='Select Extract Vendor file', accept_multiple_files=False, type=["csv"])
+ekstrakt=st.file_uploader(label=':date: Select Extract Vendor file', accept_multiple_files=False, type=["csv"])
 
 con_sub = pd.DataFrame()
-subgroups=st.file_uploader(label='Select Subgroups files', accept_multiple_files=True, type=["xlsx"])
+subgroups=st.file_uploader(label=':page_with_curl: Select Subgroups files', accept_multiple_files=True, type=["xlsx"])
 for uploaded_file in subgroups:
     sub_data = pd.read_excel(uploaded_file)
     con_sub=pd.concat([sub_data,con_sub])
@@ -126,6 +126,7 @@ if btn2:
                     st.error('Select files with subgroups')
                 else:
                     with st.status("Prepering UPD", expanded=True) as status:
+                        st.write("importing data")
                         pricelist_table = pd.read_excel(pricelist)
                         df2 = pd.read_csv(ekstrakt, delimiter=';', usecols=['ItemID', 'ItemDescription', 'ItemGroupIDSub1', 'ItemGroupIDSub2', 'ItemGroupIDSub3','ItemGroupIDSub4', 'ItemGroupIDSub5', 'CustomerEDI', 'ORIGCOUNTRYREGIONID'])
 
@@ -415,13 +416,13 @@ if btn2:
                             writer.close()
 
                             downloadTAR = st.download_button(
-                                label="Download UPD",
+                                label=":inbox_tray: Download UPD",
                                 data=bufferupd,
                                 file_name='HUAWEI-' + number_id + '-UPD-' + today + '-SKU.xlsx',
                                 mime='application/vnd.ms-excel'
                             )
                         row_count = str(len(roznica))
-                        st.write(':point_right:  ' + row_count + " new items to create")
+                        st.write(row_count + " new items to create")
 
                     else:
                         st.info('No new items to create')
@@ -443,13 +444,94 @@ st.markdown('### :small_blue_diamond:  AMD file ###')
 
 btn3 = st.button(' Create AMD', type='primary')
 if btn3:
-    st.write(ekstrakt)
-    ekstrakt_table = pd.read_csv(ekstrakt, delimiter=';')
-    # ekstrakt_table = pd.read_csv(ekstrakt)
-    st.write(ekstrakt_table)
+    if pricelist is not None:
 
-    pricelist_table = pd.read_excel(pricelist)
-    st.write(pricelist_table)
+        if id is not None:
+            if ekstrakt is not None:
+                st.write('ekstract, pricelist ok')
+                ekstrakt_table = pd.read_csv(ekstrakt, delimiter=';')
+                pricelist_table = pd.read_excel(pricelist)
+
+                # df1 to dane z pricelisty
+                # df2 to ekstrakt Huawei
+
+                pricelist_table["Description"] = pricelist_table["Description"].str.strip()
+                ekstrakt_table['ItemDescription'] = ekstrakt_table['ItemDescription'].str.strip()
+
+                # # amd_merge=pd.merge(df1,df2,left_on='SKU',right_on='ItemID')
+
+                amd_merge = pd.merge(ekstrakt_table, pricelist_table, left_on='ItemID', right_on='PartNumber', how='left', indicator=True)
+
+                amd = amd_merge.copy()
+
+
+                amd.loc[amd['ItemID'].isnull(), 'ItemID'] = amd['PartNumber']
+
+                # Sprawdzanie opisów
+                amd.loc[amd["Description"] != amd['ItemDescription'], 'correct Description'] = amd["Description"]
+
+                # pomijanie opisów dluzszych niz 180 znaków
+                amd["Description"] = amd["Description"].astype(str)
+                amd.loc[amd["Description"].str.len() > 180, 'correct Description'] = amd['ItemDescription']
+
+                # oczyszczanie description z przecinków
+                amd['correct Description'] = amd['correct Description'].str.replace(',', ' ')
+                amd['correct Description'] = amd['correct Description'].str.replace('  ', ' ')
+
+                # jezeli po oczyszczeniu oppisy sa takie same usuń z 'To correct'
+                amd.loc[amd['correct Description'] == amd['ItemDescription'], 'correct Description'] = np.NaN
+
+                # # uzupełnianie 'Origin'
+                amd['correct Origin']=np.NaN
+                amd.loc[amd['ORIGCOUNTRYREGIONID'] != "CHN", 'correct Origin'] = 'CHN'
+                # amd.loc[amd['ORIGCOUNTRYREGIONID'] == "CHN", 'correct Origin'] = np.NaN
+
+                # zmiana 'Customer EDI'
+                amd['correct Customer EDI']=np.NaN
+                amd.loc[((amd['_merge'] == 'left_only') & (amd['CustomerEDI'] == 'Yes')), 'correct Customer EDI'] = 'NO'
+                amd.loc[((amd['_merge'] == 'both') & (amd['CustomerEDI'] == 'No')), 'correct Customer EDI'] = 'YES'
+
+                amd['AMD'] = np.NaN
+                amd.loc[(amd['correct Customer EDI'].notnull() | amd['correct Description'].notnull() | amd['correct Origin'].notnull()), 'AMD'] = "To correct"
+
+                amd = amd.loc[amd['AMD'] == "To correct"]
+                amd.fillna({'correct Origin': "CHN", 'correct Customer EDI': amd['CustomerEDI'], 'correct Description': amd['ItemDescription']},inplace=True)
+
+                amd2 = amd.copy()
+                amd2.set_index('ItemID', inplace=True)
+
+                amd2 = amd2[['correct Description', 'correct Customer EDI', 'correct Origin']]
+                amd2.columns = amd2.columns.str.replace(r'correct ', '')
+
+                amd2.index.names = ['SKU']
+
+                st.write(amd)
+
+                if not amd2.empty:
+                    # buffer to use for excel writer
+                    bufferupd = io.BytesIO()
+
+                    # download button 2 to download dataframe as xlsx
+                    with pd.ExcelWriter(bufferupd, engine='xlsxwriter') as writer:
+                        # Write each dataframe to a different worksheet.
+                        iasset.to_excel(writer, sheet_name='AMD', startrow=0, startcol=0, index=False)
+                        amd2.to_excel(writer, sheet_name='AMD', startrow=1)
+                        writer.close()
+
+                        downloadTAR = st.download_button(
+                            label=":inbox_tray: Download AMD",
+                            data=bufferupd,
+                            file_name='HUAWEI-' + number_id + '-AMD-' + today + '-SKU.xlsx',
+                            mime='application/vnd.ms-excel'
+                        )
+
+            else:
+                st.error('Add HUAWEI Extract file')
+        else:
+            st.error('Select your name ID')
+    else:
+        st.error('no pricelist selected')
+
 
     # bufferamd = io.BytesIO()
 
