@@ -27,6 +27,10 @@ st.markdown('------------------------------------------------------------------'
 pricelist=st.file_uploader(label=':small_blue_diamond: Select Pricelist file', accept_multiple_files=False, type=["xlsx"])
 
 
+
+
+ekstrakt=st.file_uploader(label=':date: Select Extract Vendor file', accept_multiple_files=False, type=["csv"])
+
 st.markdown('------------------------------------------------------------------')
 
 # adding Iasset table
@@ -107,7 +111,7 @@ st.markdown('------------------------------------------------------------------'
 # ------------------------------------  UPD  -----------------------------------
 st.markdown('### :small_blue_diamond:  UPD file ###')
 
-ekstrakt=st.file_uploader(label=':date: Select Extract Vendor file', accept_multiple_files=False, type=["csv"])
+
 
 con_sub = pd.DataFrame()
 subgroups=st.file_uploader(label=':page_with_curl: Select Subgroups files', accept_multiple_files=True, type=["xlsx"])
