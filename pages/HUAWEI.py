@@ -16,7 +16,7 @@ st.markdown('[Huawei Sharpoint](https://arrowelectronics.sharepoint.com/:f:/r/si
 
 st.markdown('------------------------------------------------------------------')
 
-id=st.selectbox(':small_blue_diamond: Your name - ID',('Karol Kwiecień - A86227','Katarzyna Czyż - A86361', 'Emil Twardowski - A93176', 'Chistian Gay - A60276','Paweł Czaja - A89264', 'Hanna Źródlewska - 132693', 'Karmen Bautembach - 136182'),index=None,placeholder="Select your name")
+id=st.selectbox(':small_blue_diamond: Your name - ID',('Karol Kwiecień - A86227','Katarzyna Czyż - A86361', 'Emil Twardowski - A93176','Chistian Gay - A60276','Paweł Czaja - A89264', 'Hanna Źródlewska - 132693','Karmen Bautembach - 136182', 'Agnieszka Szarmach - A89210', 'Wojciech Sroczyński - 142049','AFIF Mouad - 152179', 'Chafika Bahi - 157981'),index=None,placeholder="Select your " "name")
 
 if id is not None:
     # st.write(id[-6:])
@@ -25,8 +25,6 @@ if id is not None:
 st.markdown('------------------------------------------------------------------')
 
 pricelist=st.file_uploader(label=':small_blue_diamond: Select Pricelist file', accept_multiple_files=False, type=["xlsx"])
-
-
 
 
 ekstrakt=st.file_uploader(label=':date: Select Extract Vendor file', accept_multiple_files=False, type=["csv"])
@@ -82,7 +80,7 @@ if btn1:
                 TAR['StdRebate'] = TAR['StdRebate'].replace(np.nan, 0)
 
                 TAR['Channel Price'] = TAR['Channel Price'].astype('float64')
-
+                st.session_state['s-tar'] = TAR
                 st.write(TAR)
 
                 # buffer to use for excel writer
@@ -111,10 +109,8 @@ st.markdown('------------------------------------------------------------------'
 # ------------------------------------  UPD  -----------------------------------
 st.markdown('### :small_blue_diamond:  UPD file ###')
 
-
-
 con_sub = pd.DataFrame()
-subgroups=st.file_uploader(label=':page_with_curl: Select Subgroups files', accept_multiple_files=True, type=["xlsx"])
+subgroups=st.file_uploader(label=':small_blue_diamond: Select Subgroups files', accept_multiple_files=True, type=["xlsx"])
 for uploaded_file in subgroups:
     sub_data = pd.read_excel(uploaded_file)
     con_sub=pd.concat([sub_data,con_sub])
@@ -288,11 +284,38 @@ if btn2:
                         st.write("Adding subgroup SUBGRUPY 1 according files")
                         time.sleep(2)
 
-                        UPD['ItemGroupIDSub1']='1'
-                        UPD['ItemGroupIDSub2']='2'
-                        UPD['ItemGroupIDSub3']='3'
-                        UPD['ItemGroupIDSub4']='4'
-                        UPD['ItemGroupIDSub5']='5'
+                        con_sub = con_sub.reset_index()
+                        con_sub.loc[con_sub['Sub group 1'].notnull(), 'Description_sub1'] = con_sub['Description']
+                        con_sub.loc[con_sub['Sub group 2'].notnull(), 'Description_sub2'] = con_sub['Description']
+                        con_sub.loc[con_sub['Sub group 3'].notnull(), 'Description_sub3'] = con_sub['Description']
+                        con_sub.loc[con_sub['Sub group 4'].notnull(), 'Description_sub4'] = con_sub['Description']
+                        con_sub['Description_sub4'] = con_sub['Description_sub4'].str.lower()
+                        con_sub.loc[con_sub['Sub group 5'].notnull(), 'Description_sub5'] = con_sub['Description']
+
+                        # st.write(con_sub)
+
+                        UPD['Product Family'] = UPD['Product Family'].str.strip()
+                        UPD['Product Line'] = UPD['Product Line'].str.strip()
+                        UPD['Discount Category'] = UPD['Discount Category'].str.strip().str.lower()
+                        UPD['Sub Product Family'] = UPD['Sub Product Family'].str.strip()
+
+                        UPD = pd.merge(UPD, con_sub[['Sub group 1', 'Description_sub1']], left_on='Software and Hardware Attributes',right_on='Description_sub1', how='left')
+                        UPD = pd.merge(UPD, con_sub[['Sub group 2', 'Description_sub2']], left_on='Product Family', right_on='Description_sub2', how='left')
+                        UPD = pd.merge(UPD, con_sub[['Sub group 3', 'Description_sub3']], left_on='Product Line', right_on='Description_sub3',how='left')
+                        UPD = pd.merge(UPD, con_sub[['Sub group 4', 'Description_sub4']], left_on='Discount Category', right_on='Description_sub4',how='left')
+                        UPD = pd.merge(UPD, con_sub[['Sub group 5', 'Description_sub5']], left_on='Sub Product Family', right_on='Description_sub5',how='left')
+
+                        UPD.loc[UPD['Software and Hardware Attributes'] == ' ', 'Sub group 1'] = '####'
+                        UPD.loc[UPD['Product Family'] == ' ', 'Sub group 2'] = '####'
+                        UPD.loc[UPD['Product Line'] == ' ', 'Sub group 3'] = '####'
+                        UPD.loc[UPD['Product Line'] == '', 'Sub group 3'] = '####'
+                        UPD.loc[UPD['Discount Category'] == ' ', 'Sub group 4'] = '####'
+                        UPD.loc[UPD['Discount Category'].isnull(), 'Sub group 4'] = '####'
+                        UPD.loc[UPD['Sub Product Family'] == ' ', 'Sub group 5'] = '####'
+                        UPD.loc[UPD['Sub Product Family'] == '', 'Sub group 5'] = '####'
+                        UPD.loc[UPD['Sub Product Family'].isnull(), 'Sub group 5'] = '####'
+
+                        UPD.rename(columns={'Sub group 1': 'SubGroup1', 'Sub group 2': 'SubGroup2', 'Sub group 3': 'SubGroup3', 'Sub group 4': 'SubGroup4','Sub group 5': 'SubGroup5'}, inplace=True)
 
 
                         st.write('adding brand , subbrand ...')
@@ -398,7 +421,7 @@ if btn2:
                         UPD2.loc[(UPD2['Activity 1'] == 'HARD'), 'Special marker'] = "MPP_GTU_06"
 
                         # #porzadkowanie kolumn
-                        UPD2 = UPD2[['Item Group', 'SKU', 'Vendor SKU', 'Item Type', 'Intrastat Code', 'Dimension Group', 'Serial Number Group','Inventory Model Group', 'Life Cycle', 'Activity 1', 'Activity 2', 'Activity 3', 'Stock Management','ItemGroupIDSub1', 'ItemGroupIDSub2', 'ItemGroupIDSub3', 'ItemGroupIDSub4', 'ItemGroupIDSub5', 'Description','ItemPrimaryVendId', 'Weight', 'Tare Weight', 'Gross width', 'Gross Height', 'Gross Depth', 'Net width','Net Height', 'Net Depth', 'Volume', 'Legacy Id', 'Finance Project Category', 'Finance Activity', 'Customer EDI','List Price UpDate', 'Dual Use', 'Virtual Item', 'Arrow Brand', 'Gross/Net', 'Gross/Net Classification','Purchase Delivery Time', 'Sales Delivery Time', 'Production Type', 'Unit point', 'Warranty', 'SUBBRAND','Renewal term', 'Special VAT Code', 'Origin', 'Special marker']]
+                        UPD2 = UPD2[['Item Group', 'SKU', 'Vendor SKU', 'Item Type', 'Intrastat Code', 'Dimension Group', 'Serial Number Group','Inventory Model Group', 'Life Cycle', 'Activity 1', 'Activity 2', 'Activity 3', 'Stock Management','SubGroup1', 'SubGroup2', 'SubGroup3', 'SubGroup4', 'SubGroup5', 'Description','ItemPrimaryVendId', 'Weight', 'Tare Weight', 'Gross width', 'Gross Height', 'Gross Depth', 'Net width','Net Height', 'Net Depth', 'Volume', 'Legacy Id', 'Finance Project Category', 'Finance Activity', 'Customer EDI','List Price UpDate', 'Dual Use', 'Virtual Item', 'Arrow Brand', 'Gross/Net', 'Gross/Net Classification','Purchase Delivery Time', 'Sales Delivery Time', 'Production Type', 'Unit point', 'Warranty', 'SUBBRAND','Renewal term', 'Special VAT Code', 'Origin', 'Special marker']]
 
                         roznica = UPD2.loc[~UPD2['SKU'].isin(df2['ItemID'])]
 
@@ -427,11 +450,11 @@ if btn2:
                             )
                         row_count = str(len(roznica))
                         st.write(row_count + " new items to create")
+                        st.write(roznica)
 
                     else:
                         st.info('No new items to create')
 
-                    st.write(roznica)
             else:
                 st.error('Add HUAWEI Extract file')
         else:
@@ -443,7 +466,7 @@ if btn2:
 st.markdown('------------------------------------------------------------------')
 # ------------------------------------  AMD  -----------------------------------
 st.markdown('### :small_blue_diamond:  AMD file ###')
-
+st.write('Finds discrepancies in EDI, description and country of origin"')
 # buffer to use for excel writer
 
 btn3 = st.button(' Create AMD', type='primary')
@@ -452,82 +475,83 @@ if btn3:
 
         if id is not None:
             if ekstrakt is not None:
-                st.write('ekstract, pricelist ok')
-                ekstrakt_table = pd.read_csv(ekstrakt, delimiter=';')
-                pricelist_table = pd.read_excel(pricelist)
 
-                # df1 to dane z pricelisty
-                # df2 to ekstrakt Huawei
+                with st.spinner('Procesing...'):
+                    ekstrakt_table = pd.read_csv(ekstrakt, delimiter=';')
+                    pricelist_table = pd.read_excel(pricelist)
 
-                pricelist_table["Description"] = pricelist_table["Description"].str.strip()
-                ekstrakt_table['ItemDescription'] = ekstrakt_table['ItemDescription'].str.strip()
+                    # df1 to dane z pricelisty
+                    # df2 to ekstrakt Huawei
 
-                # # amd_merge=pd.merge(df1,df2,left_on='SKU',right_on='ItemID')
+                    pricelist_table["Description"] = pricelist_table["Description"].str.strip()
+                    ekstrakt_table['ItemDescription'] = ekstrakt_table['ItemDescription'].str.strip()
 
-                amd_merge = pd.merge(ekstrakt_table, pricelist_table, left_on='ItemID', right_on='PartNumber', how='left', indicator=True)
+                    # # amd_merge=pd.merge(df1,df2,left_on='SKU',right_on='ItemID')
 
-                amd = amd_merge.copy()
+                    amd_merge = pd.merge(ekstrakt_table, pricelist_table, left_on='ItemID', right_on='PartNumber', how='left', indicator=True)
+
+                    amd = amd_merge.copy()
 
 
-                amd.loc[amd['ItemID'].isnull(), 'ItemID'] = amd['PartNumber']
+                    amd.loc[amd['ItemID'].isnull(), 'ItemID'] = amd['PartNumber']
 
-                # Sprawdzanie opisów
-                amd.loc[amd["Description"] != amd['ItemDescription'], 'correct Description'] = amd["Description"]
+                    # Sprawdzanie opisów
+                    amd.loc[amd["Description"] != amd['ItemDescription'], 'correct Description'] = amd["Description"]
 
-                # pomijanie opisów dluzszych niz 180 znaków
-                amd["Description"] = amd["Description"].astype(str)
-                amd.loc[amd["Description"].str.len() > 180, 'correct Description'] = amd['ItemDescription']
+                    # pomijanie opisów dluzszych niz 180 znaków
+                    amd["Description"] = amd["Description"].astype(str)
+                    amd.loc[amd["Description"].str.len() > 180, 'correct Description'] = amd['ItemDescription']
 
-                # oczyszczanie description z przecinków
-                amd['correct Description'] = amd['correct Description'].str.replace(',', ' ')
-                amd['correct Description'] = amd['correct Description'].str.replace('  ', ' ')
+                    # oczyszczanie description z przecinków
+                    amd['correct Description'] = amd['correct Description'].str.replace(',', ' ')
+                    amd['correct Description'] = amd['correct Description'].str.replace('  ', ' ')
 
-                # jezeli po oczyszczeniu oppisy sa takie same usuń z 'To correct'
-                amd.loc[amd['correct Description'] == amd['ItemDescription'], 'correct Description'] = np.NaN
+                    # jezeli po oczyszczeniu oppisy sa takie same usuń z 'To correct'
+                    amd.loc[amd['correct Description'] == amd['ItemDescription'], 'correct Description'] = np.NaN
 
-                # # uzupełnianie 'Origin'
-                amd['correct Origin']=np.NaN
-                amd.loc[amd['ORIGCOUNTRYREGIONID'] != "CHN", 'correct Origin'] = 'CHN'
-                # amd.loc[amd['ORIGCOUNTRYREGIONID'] == "CHN", 'correct Origin'] = np.NaN
+                    # # uzupełnianie 'Origin'
+                    amd['correct Origin']=np.NaN
+                    amd.loc[amd['ORIGCOUNTRYREGIONID'] != "CHN", 'correct Origin'] = 'CHN'
+                    # amd.loc[amd['ORIGCOUNTRYREGIONID'] == "CHN", 'correct Origin'] = np.NaN
 
-                # zmiana 'Customer EDI'
-                amd['correct Customer EDI']=np.NaN
-                amd.loc[((amd['_merge'] == 'left_only') & (amd['CustomerEDI'] == 'Yes')), 'correct Customer EDI'] = 'NO'
-                amd.loc[((amd['_merge'] == 'both') & (amd['CustomerEDI'] == 'No')), 'correct Customer EDI'] = 'YES'
+                    # zmiana 'Customer EDI'
+                    amd['correct Customer EDI']=np.NaN
+                    amd.loc[((amd['_merge'] == 'left_only') & (amd['CustomerEDI'] == 'Yes')), 'correct Customer EDI'] = 'NO'
+                    amd.loc[((amd['_merge'] == 'both') & (amd['CustomerEDI'] == 'No')), 'correct Customer EDI'] = 'YES'
 
-                amd['AMD'] = np.NaN
-                amd.loc[(amd['correct Customer EDI'].notnull() | amd['correct Description'].notnull() | amd['correct Origin'].notnull()), 'AMD'] = "To correct"
+                    amd['AMD'] = np.NaN
+                    amd.loc[(amd['correct Customer EDI'].notnull() | amd['correct Description'].notnull() | amd['correct Origin'].notnull()), 'AMD'] = "To correct"
 
-                amd = amd.loc[amd['AMD'] == "To correct"]
-                amd.fillna({'correct Origin': "CHN", 'correct Customer EDI': amd['CustomerEDI'], 'correct Description': amd['ItemDescription']},inplace=True)
+                    amd = amd.loc[amd['AMD'] == "To correct"]
+                    amd.fillna({'correct Origin': "CHN", 'correct Customer EDI': amd['CustomerEDI'], 'correct Description': amd['ItemDescription']},inplace=True)
 
-                amd2 = amd.copy()
-                amd2.set_index('ItemID', inplace=True)
+                    amd2 = amd.copy()
+                    amd2.set_index('ItemID', inplace=True)
 
-                amd2 = amd2[['correct Description', 'correct Customer EDI', 'correct Origin']]
-                amd2.columns = amd2.columns.str.replace(r'correct ', '')
+                    amd2 = amd2[['correct Description', 'correct Customer EDI', 'correct Origin']]
+                    amd2.columns = amd2.columns.str.replace(r'correct ', '')
 
-                amd2.index.names = ['SKU']
+                    amd2.index.names = ['SKU']
 
-                st.write(amd)
+                    st.write(amd2)
 
-                if not amd2.empty:
-                    # buffer to use for excel writer
-                    bufferupd = io.BytesIO()
+                    if not amd2.empty:
+                        # buffer to use for excel writer
+                        bufferupd = io.BytesIO()
 
-                    # download button 2 to download dataframe as xlsx
-                    with pd.ExcelWriter(bufferupd, engine='xlsxwriter') as writer:
-                        # Write each dataframe to a different worksheet.
-                        iasset.to_excel(writer, sheet_name='AMD', startrow=0, startcol=0, index=False)
-                        amd2.to_excel(writer, sheet_name='AMD', startrow=1)
-                        writer.close()
+                        # download button 2 to download dataframe as xlsx
+                        with pd.ExcelWriter(bufferupd, engine='xlsxwriter') as writer:
+                            # Write each dataframe to a different worksheet.
+                            iasset.to_excel(writer, sheet_name='AMD', startrow=0, startcol=0, index=False)
+                            amd2.to_excel(writer, sheet_name='AMD', startrow=1)
+                            writer.close()
 
-                        downloadTAR = st.download_button(
-                            label=":inbox_tray: Download AMD",
-                            data=bufferupd,
-                            file_name='HUAWEI-' + number_id + '-AMD-' + today + '-SKU.xlsx',
-                            mime='application/vnd.ms-excel'
-                        )
+                            downloadTAR = st.download_button(
+                                label=":inbox_tray: Download AMD",
+                                data=bufferupd,
+                                file_name='HUAWEI-' + number_id + '-AMD-' + today + '-SKU.xlsx',
+                                mime='application/vnd.ms-excel'
+                            )
 
             else:
                 st.error('Add HUAWEI Extract file')

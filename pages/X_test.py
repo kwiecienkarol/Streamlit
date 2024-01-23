@@ -23,7 +23,7 @@ def to_excel(df):
     processed_data = output.getvalue()
     return processed_data
 df_xlsx = to_excel(df)
-st.download_button(label='📥 Download Current Result',data=df_xlsx ,file_name= 'HHHHHHHUAWEI.xlsx')
+st.download_button(label='📥 Download Current Result',data=df_xlsx ,file_name= 'Test_2.xlsx')
 
 pricelist=st.file_uploader(label=':small_blue_diamond: Select Pricelist file', accept_multiple_files=False, type=["xlsx"])
 
