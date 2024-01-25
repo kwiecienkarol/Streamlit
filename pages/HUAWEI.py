@@ -3,11 +3,9 @@ import pandas as pd
 import time
 import datetime
 import os
-# from tkinter import filedialog
-# import tkinter as tk
 import numpy as np
-from openpyxl import load_workbook
 import io
+
 
 today=datetime.datetime.today().strftime("%d.%m.%Y")
 
@@ -126,7 +124,7 @@ if btn2:
                     st.error('Select files with subgroups')
                 else:
                     with st.status("Prepering UPD", expanded=True) as status:
-                        st.write("importing data")
+                        st.write("Importing data")
                         pricelist_table = pd.read_excel(pricelist)
                         df2 = pd.read_csv(ekstrakt, delimiter=';', usecols=['ItemID', 'ItemDescription', 'ItemGroupIDSub1', 'ItemGroupIDSub2', 'ItemGroupIDSub3','ItemGroupIDSub4', 'ItemGroupIDSub5', 'CustomerEDI', 'ORIGCOUNTRYREGIONID'])
 
@@ -281,7 +279,7 @@ if btn2:
                         UPD['Special marker'] = ''
                         UPD['Special VAT Code'] = ''
 
-                        st.write("Adding subgroup SUBGRUPY 1 according files")
+                        st.write("Adding subgroups according attached files")
                         time.sleep(2)
 
                         con_sub = con_sub.reset_index()
@@ -317,10 +315,9 @@ if btn2:
 
                         UPD.rename(columns={'Sub group 1': 'SubGroup1', 'Sub group 2': 'SubGroup2', 'Sub group 3': 'SubGroup3', 'Sub group 4': 'SubGroup4','Sub group 5': 'SubGroup5'}, inplace=True)
 
+                        st.write('Adding brand , subbrand ...')
 
-                        st.write('adding brand , subbrand ...')
-
-                        data = [('HARD', 'SECURITY', 'INITIAL', '84714900', 'HW', 'GROSS', 'HWR'),
+                        data1 = [('HARD', 'SECURITY', 'INITIAL', '84714900', 'HW', 'GROSS', 'HWR'),
                                 ('HARD', 'SERVER', 'INITIAL', '84714100', 'HW', 'GROSS', 'HWR'),
                                 ('HARD', 'STORAGE', 'INITIAL', '84714900', 'HW', 'GROSS', 'HWR'),
                                 ('HARD', 'OTHERS', 'INITIAL', '84714900', 'HW', 'GROSS', 'HWR'),
@@ -386,7 +383,7 @@ if btn2:
                                 ('SOFT HYBD', 'OTHERS', 'INITIAL', '00000000', 'HYBD', 'NET', 'HYB')
                                 ]
 
-                        gn = pd.DataFrame.from_records(data, columns=['Activity 1', 'Activity 2', 'Activity 3', 'Intrastat Code','Gross/Net Classification', 'Gross/Net', 'SUBBRAND'])
+                        gn = pd.DataFrame.from_records(data1, columns=['Activity 1', 'Activity 2', 'Activity 3', 'Intrastat Code','Gross/Net Classification', 'Gross/Net', 'SUBBRAND'])
                         gn['merge'] = gn['Activity 1'] + gn['Activity 2'] + gn['Activity 3']
 
 
@@ -420,6 +417,43 @@ if btn2:
                         UPD2.loc[((UPD2['Activity 1'] == 'SERVICE') & (UPD2['Activity 2'] == 'TRAINING')) & (~UPD2['Description'].str.contains('|'.join(['fee', 'Travel costs', 'Travel expenses', 'Conference', 'event', 'training materials', 'books']),case=False)), 'Special marker'] = "GTU_12"
                         UPD2.loc[(UPD2['Activity 1'] == 'HARD'), 'Special marker'] = "MPP_GTU_06"
 
+                        # sprawdzanie brakujacych subgrup
+                        new_sub = UPD2.copy()
+
+                        new_sub.loc[new_sub['SubGroup1'].isnull(), 'NEW_Subgrup1'] = 'NEW_SUB_1'
+                        new_sub.loc[new_sub['NEW_Subgrup1'] == 'NEW_SUB_1', 'NEW_Subgrup1_description'] = new_sub['Software and Hardware Attributes']
+
+                        new_sub.loc[new_sub['SubGroup2'].isnull(), 'NEW_Subgrup2'] = 'NEW_SUB_2'
+                        new_sub.loc[new_sub['NEW_Subgrup2'] == 'NEW_SUB_2', 'NEW_Subgrup2_description'] = new_sub['Product Family']
+
+                        new_sub.loc[new_sub['SubGroup3'].isnull(), 'NEW_Subgrup3'] = 'NEW_SUB_3'
+                        new_sub.loc[new_sub['NEW_Subgrup3'] == 'NEW_SUB_3', 'NEW_Subgrup3_description'] = new_sub['Product Line']
+
+                        new_sub.loc[new_sub['SubGroup4'].isnull(), 'NEW_Subgrup4'] = 'NEW_SUB_4'
+                        new_sub.loc[new_sub['NEW_Subgrup4'] == 'NEW_SUB_4', 'NEW_Subgrup4_description'] = new_sub['Discount Category']
+
+                        new_sub.loc[new_sub['SubGroup5'].isnull(), 'NEW_Subgrup5'] = 'NEW_SUB_5'
+                        new_sub.loc[new_sub['NEW_Subgrup5'] == 'NEW_SUB_5', 'NEW_Subgrup5_description'] = new_sub['Sub Product Family']
+
+                        # tworzenie nowych tabel z subrupami i usuwanie pustuch oraz duplikatow nazwy
+                        new_sub1 = new_sub[new_sub['NEW_Subgrup1_description'].notnull()]
+                        new_sub2 = new_sub[new_sub['NEW_Subgrup2_description'].notnull()]
+                        new_sub3 = new_sub[new_sub['NEW_Subgrup3_description'].notnull()]
+                        new_sub4 = new_sub[new_sub['NEW_Subgrup4_description'].notnull()]
+                        new_sub5 = new_sub[new_sub['NEW_Subgrup5_description'].notnull()]
+
+                        new_sub1 = new_sub1['NEW_Subgrup1_description'].drop_duplicates()
+                        new_sub2 = new_sub2['NEW_Subgrup2_description'].drop_duplicates()
+                        new_sub3 = new_sub3['NEW_Subgrup3_description'].drop_duplicates()
+                        new_sub4 = new_sub4['NEW_Subgrup4_description'].drop_duplicates()
+                        new_sub5 = new_sub5['NEW_Subgrup5_description'].drop_duplicates()
+
+                        st.session_state['new_sub1']=new_sub1
+                        st.session_state['new_sub2']=new_sub2
+                        st.session_state['new_sub3']=new_sub3
+                        st.session_state['new_sub4']=new_sub4
+                        st.session_state['new_sub5']=new_sub5
+
                         # #porzadkowanie kolumn
                         UPD2 = UPD2[['Item Group', 'SKU', 'Vendor SKU', 'Item Type', 'Intrastat Code', 'Dimension Group', 'Serial Number Group','Inventory Model Group', 'Life Cycle', 'Activity 1', 'Activity 2', 'Activity 3', 'Stock Management','SubGroup1', 'SubGroup2', 'SubGroup3', 'SubGroup4', 'SubGroup5', 'Description','ItemPrimaryVendId', 'Weight', 'Tare Weight', 'Gross width', 'Gross Height', 'Gross Depth', 'Net width','Net Height', 'Net Depth', 'Volume', 'Legacy Id', 'Finance Project Category', 'Finance Activity', 'Customer EDI','List Price UpDate', 'Dual Use', 'Virtual Item', 'Arrow Brand', 'Gross/Net', 'Gross/Net Classification','Purchase Delivery Time', 'Sales Delivery Time', 'Production Type', 'Unit point', 'Warranty', 'SUBBRAND','Renewal term', 'Special VAT Code', 'Origin', 'Special marker']]
 
@@ -452,6 +486,7 @@ if btn2:
                         st.write(row_count + " new items to create")
                         st.write(roznica)
 
+
                     else:
                         st.info('No new items to create')
 
@@ -462,11 +497,40 @@ if btn2:
     else:
         st.error('no pricelist selected')
 
+if 'new_sub1' not in st.session_state:
+    st.write('')
+else:
+
+    # sprawdzanie czy sa nowe subgrupy do dodania
+    if st.session_state['new_sub1'].empty and st.session_state['new_sub2'].empty and st.session_state['new_sub3'].empty and st.session_state['new_sub4'].empty and st.session_state['new_sub5'].empty:
+        st.info('No new subgroups to create')
+    else:
+        buffersub = io.BytesIO()
+
+        # download button 2 to download dataframe as xlsx
+        with pd.ExcelWriter(buffersub, engine='xlsxwriter') as writer:
+            st.session_state['new_sub1'].to_excel(writer, sheet_name="SUBGROUPS", index=False, header=True)
+            st.session_state['new_sub2'].to_excel(writer, sheet_name="SUBGROUPS", startcol=2, startrow=0, header=True, index=False)
+            st.session_state['new_sub3'].to_excel(writer, sheet_name="SUBGROUPS", startcol=4, startrow=0, header=True, index=False)
+            st.session_state['new_sub4'].to_excel(writer, sheet_name="SUBGROUPS", startcol=6, startrow=0, header=True, index=False)
+            st.session_state['new_sub5'].to_excel(writer, sheet_name="SUBGROUPS", startcol=8, startrow=0, header=True, index=False)
+            worksheet = writer.sheets['SUBGROUPS']
+            worksheet.autofit()
+            writer.close()
+
+        downloadSUB = st.download_button(
+            label=":inbox_tray: Download Soubgroups to create",
+            data=buffersub,
+            file_name='New subgroups-' + today + '.xlsx',
+            mime='application/vnd.ms-excel')
+
+
+
 
 st.markdown('------------------------------------------------------------------')
 # ------------------------------------  AMD  -----------------------------------
-st.markdown('### :small_blue_diamond:  AMD file ###')
-st.write('Finds discrepancies in EDI, description and country of origin"')
+st.markdown('### :small_blue_diamond:  AMD file  ###')
+st.write('Finds discrepancies in EDI, description and country of origin')
 # buffer to use for excel writer
 
 btn3 = st.button(' Create AMD', type='primary')
