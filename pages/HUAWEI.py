@@ -150,28 +150,28 @@ if btn2:
 
                         #   GROSS
                         UPD["Pack Dimension\n (D*W*H mm) "] = UPD["Pack Dimension\n (D*W*H mm) "].str.extract(
-                            r'([0-9]{1,5}[*][0-9]{1,5}[*][0-9]{1,5})', expand=True)
+                            r'([0-9.]{1,5}[*][0-9.]{1,5}[*][0-9.]{1,5})', expand=True)
                         UPD["Pack Dimension\n (D*W*H mm) "] = UPD["Pack Dimension\n (D*W*H mm) "].str.replace(r'[*]{2}', '*', regex=True)
                         UPD[['Gross width', 'Gross Height', 'Gross Depth']] = UPD["Pack Dimension\n (D*W*H mm) "].str.split(r'[*]', expand=True)
 
                         UPD['Gross width'] = UPD['Gross width'].fillna(0)
                         UPD['Gross Height'] = UPD['Gross Height'].fillna(0)
                         UPD['Gross Depth'] = UPD['Gross Depth'].fillna(0)
-                        UPD = UPD.astype({'Gross width': 'int', 'Gross Height': 'int', 'Gross Depth': 'int'})
+                        UPD = UPD.astype({'Gross width': 'float', 'Gross Height': 'float', 'Gross Depth': 'float'})
 
                         UPD['Gross width'] = UPD['Gross width'] / 1000
                         UPD['Gross Height'] = UPD['Gross Height'] / 1000
                         UPD['Gross Depth'] = UPD['Gross Depth'] / 1000
 
                         #  NET
-                        UPD["Net Dimension\n (D*W*H mm) "] = UPD["Net Dimension\n (D*W*H mm) "].str.extract(r'([0-9]{1,5}[*][0-9]{1,5}[*][0-9]{1,5})', expand=True)
+                        UPD["Net Dimension\n (D*W*H mm) "] = UPD["Net Dimension\n (D*W*H mm) "].str.extract(r'([0-9.]{1,5}[*][0-9.]{1,5}[*][0-9.]{1,5})', expand=True)
                         UPD["Net Dimension\n (D*W*H mm) "] = UPD["Net Dimension\n (D*W*H mm) "].str.replace(r'[*]{2}', '*', regex=True)
                         UPD[['Net width', 'Net Height', 'Net Depth']] = UPD["Net Dimension\n (D*W*H mm) "].str.split(r'[*]', expand=True)
 
                         UPD['Net width'] = UPD['Net width'].fillna(0)
                         UPD['Net Height'] = UPD['Net Height'].fillna(0)
                         UPD['Net Depth'] = UPD['Net Depth'].fillna(0)
-                        UPD = UPD.astype({'Net width': 'int', 'Net Height': 'int', 'Net Depth': 'int'})
+                        UPD = UPD.astype({'Net width': 'float', 'Net Height': 'float', 'Net Depth': 'float'})
 
                         UPD['Net width'] = UPD['Net width'] / 1000
                         UPD['Net Height'] = UPD['Net Height'] / 1000
@@ -485,8 +485,8 @@ if btn2:
                         row_count = str(len(roznica))
                         st.write(row_count + " new items to create")
                         st.write(roznica)
-
-
+                        # st.write(st.session_state['new_sub1'])
+                        # st.write(st.session_state['new_sub2'])
                     else:
                         st.info('No new items to create')
 

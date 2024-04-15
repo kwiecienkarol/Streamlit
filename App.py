@@ -13,7 +13,7 @@ st.header('')
 
 st.write('')
 st.write('Program transform Pricelist files to UPD, TAR and AMD format.')
-st.write('Once the price list data has been imported, it can be processed in a variety of ways')
+st.write('Once the price list data has been imported it can be processed in a variety of ways')
 st.write('Application can automate tasks, increased efficiency, reduce errors and improved data quality ')
 st.markdown('-----------')
 

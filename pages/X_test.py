@@ -3,11 +3,12 @@ from io import BytesIO
 # from pyxlsb import open_workbook as open_xlsb
 import streamlit as st
 
+# st.set_page_config(layout="wide")
 data = {
-    "calories": [420, 380, 390],
-    "duration": [50, 40, 45],
-    "random1": [5, 12, 1],
-    "random2": [230, 23, 1]
+    "a": [420, 380, 390],
+    "b": [50, 40, 45],
+    "c": [5, 12, 1],
+    "d": [230, 23, 1]
 }
 df = pd.DataFrame(data)
 
@@ -41,13 +42,13 @@ today=datetime.datetime.today().strftime("%d.%m.%Y")
 # buffer to use for excel writer
 buffer = io.BytesIO()
 
-data = {
-    "calories": [4200000, 3800000, 39000000],
-    "duration": [50, 40, 45],
-    "random1": [5, 12, 1],
-    "random2": [230, 23, 1]
-}
-df = pd.DataFrame(data)
+# data = {
+#     "calories": [4200000, 3800000, 39000000],
+#     "duration": [50, 40, 45],
+#     "random1": [5, 12, 1],
+#     "random2": [230, 23, 1]
+# }
+# df = pd.DataFrame(data)
 
 iasset_data={'iAsset':[],'No':[]}
 iasset=pd.DataFrame(iasset_data)
@@ -71,3 +72,6 @@ with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         file_name='HUAWEI-TAR-'+today+'-SKU.xlsx',
         mime='application/vnd.ms-excel'
     )
+
+
+

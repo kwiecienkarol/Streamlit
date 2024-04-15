@@ -13,6 +13,9 @@ data = {
 }
 df = pd.DataFrame(data)
 
+# st.markdown(f'<h1 style="color:#33ff33;font-size:24px;">{"ColorMeBlue text”"}</h1>', unsafe_allow_html=True)
+
+st.markdown('<style>stApp{background-color: green;}<style>', unsafe_allow_html=True)
 
 # Write files to in-memory strings using BytesIO
 # See: https://xlsxwriter.readthedocs.io/workbook.html?highlight=BytesIO#constructor
@@ -40,4 +43,26 @@ if con_sub.empty:
 else:
     st.success('file loaded')
     # st.write(subgroups)
+
+
+import streamlit as st
+import streamlit.components.v1 as components
+
+st.title("Yellow component ")
+
+html_content = "<div>Hello world</div>"
+yellow_background = "<style>:root {background-color: rgb(223, 230, 237);}</style>"
+components.html(yellow_background + html_content)
+
+st.markdown(
+        """
+         background-color: rgb(223, 230, 237);}</style>
+        <span style="color:blue">some *This is Blue italic.* text</span>
+    """,
+    unsafe_allow_html=True
+    )
+
+st.markdown("This text is :red[colored red], and this is **:blue[colored]** and bold.")
+
+st.markdown(f'<h1 style="color:#33ff44;font-size:24px;">{"ColorMeBlue text”"}</h1>', unsafe_allow_html=True)
 
